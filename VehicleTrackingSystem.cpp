@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <string>
+
 using namespace std;
 
 // Defining the Car class //
@@ -18,27 +20,24 @@ class Car
     Car(string type, string make, string model, string year);
 
     // Declaring member functions //
-    void addCar();
+    void addCar(vector<Car> &inventory);
     void deleteCar();
     void sellCar();
     void searchCar();
-    void printInventory();
-
+    void printInventory(vector<Car> inventory);
+    friend ostream& operator<<(ostream& os, Car& car);
     // Declaring the destructor //
     ~Car();
 
 };
 
 // Defining the constructor for the Car class //
-Car::Car(string type, string make, string model, string year)
+Car::Car(string type2, string make2, string model2, string year2) : type(type2), make(make2), model(model2), year(year2)
 {
-  type = type;
-  make = make;
-  model = model;
-  year = year;
+	count = 1;
 }
 
-void Car::addCar()
+void Car::addCar(vector<Car> &inventory)
 {
   // Declaring temporary string variables //
   string tempType;
@@ -80,10 +79,26 @@ void Car::searchCar()
 }
 
 // Defining the function that will print the current inventory //
-void Car::printInventory()
+void Car::printInventory(vector<Car> inventory)
 {
+	for (int position = 0; position < (int) inventory.size(); position++)
+	{
+		cout << inventory[position] << endl;
+	}
+}
+
+// Overloading << operator to print cars //
+ostream& operator<<(ostream& os, Car& car)
+{
+	os << "Type:\t" << car.type << endl
+		<< "Make:\t" << car.make << endl
+		<< "Model:\t" << car.model << endl
+		<< "Year:\t" << car.year << endl
+		<< "Count:\t" << car.count << endl;
+	return os;
 
 }
+
 
 // Defining the destructor for the Car class //
 Car::~Car()
@@ -96,8 +111,11 @@ int main()
   // Declaring an integer variable //
   int option = 0;
 
+  // Declaring placeholder car for calling non-static methods //
+  Car car("0", "0", "0", "0");
+
   // Declaring a vector of Car pointers //
-  vector<Car *> inventory(); // TODO Should this be Car or Car *? //
+  vector<Car> inventory; // TODO Should this be Car or Car *? //
 
   cout << "Welcome to this car dealership!\n\n";
 
@@ -117,6 +135,7 @@ int main()
     switch (option)
     {
       case 1:
+        car.addCar(inventory);
         // Call addCar //
         break;
       case 2:
@@ -130,6 +149,8 @@ int main()
         break;
       case 5:
         // Call printInventory //
+        car.printInventory(inventory);
+        cout << "Inventory size: " << inventory.size() << endl;
         break;
       default:
         cout << "\n\nThank you for using this program!\nSee you next time!\n";

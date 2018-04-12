@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include<sstream>
 
 using namespace std;
 
@@ -17,7 +18,7 @@ public:
     int count;
 
     // Declaring the constructor //
-    Car(string type, string make, string model, string year);
+    Car(string type, string make, string model, string year, int count);
 
     // Declaring member functions //
     void addCar(vector<Car> &inventory);
@@ -25,6 +26,7 @@ public:
     void sellCar();
     void searchCar(vector<Car> inventory);
     void printInventory(vector<Car> inventory);
+    int getCarIndex(vector<Car> inventory);
     friend ostream& operator<<(ostream& os, Car& car);
     friend bool operator==(const Car& compare1, const Car& compare2);
     // Declaring the destructor //
@@ -33,9 +35,10 @@ public:
 };
 
 // Defining the constructor for the Car class //
-Car::Car(string type2, string make2, string model2, string year2) : type(type2), make(make2), model(model2), year(year2)
+Car::Car(string type2, string make2, string model2, string year2, int count2) : type(type2), make(make2), model(model2),
+year(year2), count(count2)
 {
-    count = 1;
+
 }
 
 void Car::addCar(vector<Car> &inventory)
@@ -45,20 +48,40 @@ void Car::addCar(vector<Car> &inventory)
     string tempMake;
     string tempModel;
     string tempYear;
+    string sTempCount;
+    int iTempCount = 0;
 
     // Prompting for and reading in user input for car details //
-    cout << "Please enter the following information regarding the vehicle:\n";
+    cout << "Please enter the following information regarding the vehicle:" << endl;
     cout << "Type: ";
-    cin >> tempType;
+    getline(std::cin.ignore(), tempType); //need to use cin.ignore() to ignore that newline
     cout << "Make: ";
-    cin >> tempMake;
+    getline(std::cin, tempMake);
     cout << "Model: ";
-    cin >> tempModel;
+    getline(std::cin, tempModel);
     cout << "Year: ";
-    cin >> tempYear;
+    getline(std::cin, tempYear);
+    cout << "Count: ";
+    getline(std::cin, sTempCount);
+    stringstream convert(sTempCount);   //converting string to int
+    convert >> iTempCount;
+    //cout << iTempCount << " iTempCount" << endl;
 
-    Car newCar(tempType, tempMake, tempModel, tempYear);
-    inventory.push_back(newCar); // TODO(Vector placement/usage has to be sorted out, not currently working) //
+    //If user leaves Count empty, assume at least 1 car and not 0
+    if (iTempCount == 0)
+        iTempCount = 1;
+
+
+    Car newCar(tempType, tempMake, tempModel, tempYear, iTempCount); // Make newCar object with desired Type, Make, Model, and Year
+    int newCarIndex = newCar.getCarIndex(inventory);     // Get index to see if it exists in the vector already
+    if(newCarIndex == -1)
+    {
+        inventory.push_back(newCar);    // TODO(Vector placement/usage has to be sorted out, not currently working) //
+    }
+    else
+    {
+        inventory[newCarIndex].count += newCar.count; //Add count of the car with the same attributes
+    }
 }
 
 // Defining the function that will delete car batches from the car vector //
@@ -94,10 +117,24 @@ void Car::searchCar(vector<Car> inventory)
 // Defining the function that will print the current inventory //
 void Car::printInventory(vector<Car> inventory)
 {
+    int numCars = 0;    //for getting total number of cars
     for (int position = 0; position < (int)inventory.size(); position++)
     {
+        numCars += inventory[position].count;
         cout << inventory[position] << endl;
     }
+    cout << endl  << endl << "Number of cars in inventory: " << numCars << endl; //print total number of cars
+}
+
+// Defining the function that will return the index of an equivalent car //
+int Car::getCarIndex(vector<Car> inventory)
+{
+    for (int pos = 0; pos < inventory.size(); pos++)
+    {
+        if (inventory[pos] == *this)
+            return pos;
+    }
+    return -1;
 }
 
 // Overloading << operator to print cars //
@@ -136,7 +173,7 @@ int main()
     int option = 0;
 
     // Declaring placeholder car for calling non-static methods //
-    Car car("0", "0", "0", "0");
+    Car car("0", "0", "0", "0", 0);
 
     // Declaring a vector of Car pointers //
     vector<Car> inventory; // TODO Should this be Car or Car *? //
@@ -159,8 +196,8 @@ int main()
         switch (option)
         {
         case 1:
-            car.addCar(inventory);
             // Call addCar //
+            car.addCar(inventory);
             break;
         case 2:
             // Call deleteCar //
@@ -169,13 +206,12 @@ int main()
             // Call sellCar //
             break;
         case 4:
-            car.searchCar(inventory);
             // Call searchCar //
+            car.searchCar(inventory);
             break;
         case 5:
             // Call printInventory //
             car.printInventory(inventory);
-            cout << "Inventory size: " << inventory.size() << endl;
             break;
         default:
             cout << "\n\nThank you for using this program!\nSee you next time!\n";

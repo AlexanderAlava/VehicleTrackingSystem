@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include<sstream>
+#include <sstream>
 
 using namespace std;
 
@@ -23,9 +23,10 @@ public:
     // Declaring member functions //
     void addCar(vector<Car> &inventory);
     void deleteCar();
-    void sellCar();
+    void sellCar(vector<Car> inventory);
     void searchCar(vector<Car> inventory);
     void printInventory(vector<Car> inventory);
+    void promptCar(string &tempType, string &tempMake, string &tempModel, string &tempYear);
     int getCarIndex(vector<Car> inventory);
     friend ostream& operator<<(ostream& os, Car& car);
     friend bool operator==(const Car& compare1, const Car& compare2);
@@ -52,15 +53,7 @@ void Car::addCar(vector<Car> &inventory)
     int iTempCount = 0;
 
     // Prompting for and reading in user input for car details //
-    cout << "Please enter the following information regarding the vehicle:" << endl;
-    cout << "Type: ";
-    getline(std::cin.ignore(), tempType); //need to use cin.ignore() to ignore that newline
-    cout << "Make: ";
-    getline(std::cin, tempMake);
-    cout << "Model: ";
-    getline(std::cin, tempModel);
-    cout << "Year: ";
-    getline(std::cin, tempYear);
+    promptCar(tempType, tempMake, tempModel, tempYear);
     cout << "Count: ";
     getline(std::cin, sTempCount);
     stringstream convert(sTempCount);   //converting string to int
@@ -91,7 +84,7 @@ void Car::deleteCar()
 }
 
 // Defining the function that will delete a sold car from the inventory //
-void Car::sellCar()
+void Car::sellCar(vector<Car> inventory)
 {
 
 }
@@ -104,15 +97,7 @@ void Car::searchCar(vector<Car> inventory)
     string tempModel;
     string tempYear;
 
-    cout << "Please enter the following information regarding the vehicle:" << endl;
-    cout << "Type: ";
-    getline(std::cin.ignore(), tempType); //need to use cin.ignore() to ignore that newline
-    cout << "Make: ";
-    getline(std::cin, tempMake);
-    cout << "Model: ";
-    getline(std::cin, tempModel);
-    cout << "Year: ";
-    getline(std::cin, tempYear);
+    promptCar(tempType, tempMake, tempModel, tempYear);
 
     vector<Car> tempList;
     for (int pos = 0; pos < inventory.size(); pos++)
@@ -145,6 +130,21 @@ void Car::printInventory(vector<Car> inventory)
         cout << inventory[position] << endl;
     }
     cout << endl  << endl << "Number of cars in inventory: " << numCars << endl; //print total number of cars
+}
+
+// Defining the prompt function that will ask for the car details //
+void Car::promptCar(string &tempType, string &tempMake, string &tempModel, string &tempYear)
+{
+    cout << "Please enter the following information regarding the vehicle:" << endl;
+    cout << "Type: ";
+    getline(std::cin.ignore(), tempType); //need to use cin.ignore() to ignore that newline
+    cout << "Make: ";
+    getline(std::cin, tempMake);
+    cout << "Model: ";
+    getline(std::cin, tempModel);
+    cout << "Year: ";
+    getline(std::cin, tempYear);
+    return;
 }
 
 // Defining the function that will return the index of an equivalent car //

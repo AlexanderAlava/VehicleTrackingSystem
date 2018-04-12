@@ -99,19 +99,40 @@ void Car::sellCar()
 // Defining the function that will search for a specific car //
 void Car::searchCar(vector<Car> inventory)
 {
+    string tempType;
+    string tempMake;
+    string tempModel;
+    string tempYear;
 
-    //quick test
-    //Car car("r", "r", "t", "t");
-    //for (int pos = 0; pos < (int)inventory.size(); pos++)
-    //{
-    //    if (inventory[pos] == car)
-    //    {
-    //        cout << "!!Match found!!" << endl;
-    //        return;
-    //    }
-    //}
-    //cout << "!!No match found!!" << endl;
-    //return;
+    cout << "Please enter the following information regarding the vehicle:" << endl;
+    cout << "Type: ";
+    getline(std::cin.ignore(), tempType); //need to use cin.ignore() to ignore that newline
+    cout << "Make: ";
+    getline(std::cin, tempMake);
+    cout << "Model: ";
+    getline(std::cin, tempModel);
+    cout << "Year: ";
+    getline(std::cin, tempYear);
+
+    vector<Car> tempList;
+    for (int pos = 0; pos < inventory.size(); pos++)
+    {
+        if (inventory[pos].type == tempType || tempType.length() == 0) //if type matches or no input
+        {
+            if (inventory[pos].make == tempMake || tempMake.length() == 0) //if make matches or no input
+            {
+                if (inventory[pos].model == tempModel || tempModel.length() == 0) //if model matches or no input
+                {
+                    if (inventory[pos].year == tempYear || tempYear.length() == 0) //if year matches or no input
+                        tempList.push_back(inventory[pos]); //push car from inv on to tempList if it meets criteria
+                }
+            }
+        }
+    }
+    cout << endl << endl << "Cars matching search: " << endl;
+    printInventory(tempList);
+
+
 }
 
 // Defining the function that will print the current inventory //

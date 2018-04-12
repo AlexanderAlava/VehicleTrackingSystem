@@ -55,27 +55,43 @@ void Car::addCar(vector<Car> &inventory)
 
     // Prompting for and reading in user input for car details //
     promptCar(tempType, tempMake, tempModel, tempYear);
-    cout << "Count: ";
+    std::cout << "Count: ";
     getline(std::cin, sTempCount);
     stringstream convert(sTempCount);   //converting string to int
     convert >> iTempCount;
     //cout << iTempCount << " iTempCount" << endl;
 
-    //If user leaves Count empty, assume at least 1 car and not 0
-    if (iTempCount == 0)
+    //If user leaves Count empty or puts down a dumb negative number, assume at least 1 car and not 0 or nega-cars
+    if (iTempCount <= 0)
         iTempCount = 1;
 
 
     Car newCar(tempType, tempMake, tempModel, tempYear, iTempCount); // Make newCar object with desired Type, Make, Model, and Year
-    int newCarIndex = newCar.getCarIndex(inventory);     // Get index to see if it exists in the vector already
-    if(newCarIndex == -1)
+    if (newCar.carExists(inventory, iTempCount)) //reusing iTempCount as carIndex
     {
-        inventory.push_back(newCar);    // TODO(Vector placement/usage has to be sorted out, not currently working) //
+        //if the car already exists in the inventory, add to the count
+        inventory[iTempCount].count += newCar.count;
     }
     else
     {
-        inventory[newCarIndex].count += newCar.count; //Add count of the car with the same attributes
+        //if the car doesn't exist in the inventory, add it to the inventory
+        inventory.push_back(newCar);
     }
+    
+    
+    /*-------------------------------------------------------------------------------------
+    Original logic that checked if car was in the inventory already 
+    -------------------------------------------------------------------------------------*/
+
+    //int newCarIndex = newCar.getCarIndex(inventory);     // Get index to see if it exists in the vector already
+    //if(newCarIndex == -1)
+    //{
+    //    inventory.push_back(newCar);    // TODO(Vector placement/usage has to be sorted out, not currently working) //
+    //}
+    //else
+    //{
+    //    inventory[newCarIndex].count += newCar.count; //Add count of the car with the same attributes
+    //}
 }
 
 // Defining the function that will delete car batches from the car vector //
@@ -95,6 +111,11 @@ void Car::deleteCar(vector<Car> &inventory)
     {
         inventory[carIndex].~Car();
         inventory.erase(inventory.begin() + carIndex);
+    }
+    else
+    {
+        //otherwise tell user that they can't delete a car that never existed
+        std::cout << endl << endl << "Can't delete a car that doesn't exist!" << endl;
     }
 
 }
@@ -124,7 +145,11 @@ void Car::sellCar(vector<Car> &inventory)
         }
         return;
     }
-    return;
+    else //otherwise tell user that the car they are trying to sell doesn't exist
+    {
+        std::cout << endl << endl << "Car does not exist!" << endl;
+        return;
+    }
 
 }
 
@@ -153,7 +178,7 @@ void Car::searchCar(vector<Car> inventory)
             }
         }
     }
-    cout << endl << endl << "Cars matching search: " << endl;
+    std::cout << endl << endl << "Cars matching search: " << endl;
     printInventory(tempList);
 
 
@@ -166,22 +191,22 @@ void Car::printInventory(vector<Car> inventory)
     for (int position = 0; position < (int)inventory.size(); position++)
     {
         numCars += inventory[position].count;
-        cout << inventory[position] << endl;
+        std::cout << inventory[position] << endl;
     }
-    cout << endl  << endl << "Number of cars in inventory: " << numCars << endl; //print total number of cars
+    std::cout << endl  << endl << "Number of cars in inventory: " << numCars << endl; //print total number of cars
 }
 
 // Defining the prompt function that will ask for the car details //
 void Car::promptCar(string &tempType, string &tempMake, string &tempModel, string &tempYear)
 {
-    cout << "Please enter the following information regarding the vehicle:" << endl;
-    cout << "Type: ";
+    std::cout << "Please enter the following information regarding the vehicle:" << endl;
+    std::cout << "Type: ";
     getline(std::cin.ignore(), tempType); //need to use cin.ignore() to ignore that newline
-    cout << "Make: ";
+    std::cout << "Make: ";
     getline(std::cin, tempMake);
-    cout << "Model: ";
+    std::cout << "Model: ";
     getline(std::cin, tempModel);
-    cout << "Year: ";
+    std::cout << "Year: ";
     getline(std::cin, tempYear);
     return;
 }
@@ -207,7 +232,6 @@ bool Car::carExists(vector<Car> inventory, int &carIndex)
         return true;
     else
     {
-        cout << endl << endl << "Car does not exist!" << endl;
         return false;
     }
 }
@@ -253,19 +277,19 @@ int main()
     // Declaring a vector of Car pointers //
     vector<Car> inventory; // TODO Should this be Car or Car *? //
 
-    cout << "Welcome to this car dealership!\n\n";
+    std::cout << "Welcome to this car dealership!\n\n";
 
     // Establishing an infinite while loop to run the program //
     while (true)
     {
         // Prompting for and reading in input for current selection //
-        cout << "(1) Add a car batch to the inventory.\n";
-        cout << "(2) Delete a car batch from the inventory.\n";
-        cout << "(3) Complete a sale.\n";
-        cout << "(4) Search for a specific car in the inventory.\n";
-        cout << "(5) Print current availability of all vehicles in the inventory.\n\n";
-        cout << "Please enter your selection or enter anything else to exit the program: ";
-        cin >> option;
+        std::cout << "(1) Add a car batch to the inventory.\n";
+        std::cout << "(2) Delete a car batch from the inventory.\n";
+        std::cout << "(3) Complete a sale.\n";
+        std::cout << "(4) Search for a specific car in the inventory.\n";
+        std::cout << "(5) Print current availability of all vehicles in the inventory.\n\n";
+        std::cout << "Please enter your selection or enter anything else to exit the program: ";
+        std::cin >> option;
 
         // Establishing a switch case that determines current action //
         switch (option)
@@ -291,7 +315,7 @@ int main()
             car.printInventory(inventory);
             break;
         default:
-            cout << "\n\nThank you for using this program!\nSee you next time!\n";
+            std::cout << "\n\nThank you for using this program!\nSee you next time!\n";
             return 0;
         }
     }

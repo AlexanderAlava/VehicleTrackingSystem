@@ -22,12 +22,13 @@ public:
 
     // Declaring member functions //
     void addCar(vector<Car> &inventory);
-    void deleteCar();
-    void sellCar(vector<Car> inventory);
-    void searchCar(vector<Car> inventory);
+    void deleteCar(vector<Car> &inventory);
+    void sellCar(vector<Car> &inventory);
+    void searchCar(vector<Car> inventory); //searches for car based on parameters. all fields not needed
     void printInventory(vector<Car> inventory);
     void promptCar(string &tempType, string &tempMake, string &tempModel, string &tempYear);
-    int getCarIndex(vector<Car> inventory);
+    int getCarIndex(vector<Car> inventory); //gets index of car in inventory that matches search. ALL FIELDS NEEDED
+    bool carExists(vector<Car> inventory, int &carIndex);
     friend ostream& operator<<(ostream& os, Car& car);
     friend bool operator==(const Car& compare1, const Car& compare2);
     // Declaring the destructor //
@@ -78,14 +79,52 @@ void Car::addCar(vector<Car> &inventory)
 }
 
 // Defining the function that will delete car batches from the car vector //
-void Car::deleteCar()
+void Car::deleteCar(vector<Car> &inventory)
 {
+    //Prompt user for car details
+    string tempType;
+    string tempMake;
+    string tempModel;
+    string tempYear;
+    int carIndex;
+    promptCar(tempType, tempMake, tempModel, tempYear);
+    //See if car exists within the inventory
+    Car searchedCar(tempType, tempMake, tempModel, tempYear, 0);
+    //If car exists, remove it from the inventory
+    if (searchedCar.carExists(inventory, carIndex))
+    {
+        inventory[carIndex].~Car();
+        inventory.erase(inventory.begin() + carIndex);
+    }
 
 }
 
 // Defining the function that will delete a sold car from the inventory //
-void Car::sellCar(vector<Car> inventory)
+void Car::sellCar(vector<Car> &inventory)
 {
+    //Prompt user for car details
+    string tempType;
+    string tempMake;
+    string tempModel;
+    string tempYear;
+    int carIndex;
+    promptCar(tempType, tempMake, tempModel, tempYear);
+    //See if car exists within the inventory
+    Car searchedCar(tempType, tempMake, tempModel, tempYear, 0);
+    //if car exists, decrement the count
+    if (searchedCar.carExists(inventory,carIndex))
+    {
+        //Decrement car count
+        inventory[carIndex].count--;
+        //If car has 0 or less, then delete car and remove the index from the vector
+        if (inventory[carIndex].count <= 0)
+        {
+            inventory[carIndex].~Car();
+            inventory.erase(inventory.begin() + carIndex);
+        }
+        return;
+    }
+    return;
 
 }
 
@@ -158,6 +197,21 @@ int Car::getCarIndex(vector<Car> inventory)
     return -1;
 }
 
+// Defining the function that will return if the car exists in the inventory or not and the index//
+bool Car::carExists(vector<Car> inventory, int &carIndex)
+{
+    //get the index
+    carIndex = this->getCarIndex(inventory);
+    //return bool based on index
+    if (carIndex > -1)
+        return true;
+    else
+    {
+        cout << endl << endl << "Car does not exist!" << endl;
+        return false;
+    }
+}
+
 // Overloading << operator to print cars //
 ostream& operator<<(ostream& os, Car& car)
 {
@@ -222,9 +276,11 @@ int main()
             break;
         case 2:
             // Call deleteCar //
+            car.deleteCar(inventory);
             break;
         case 3:
             // Call sellCar //
+            car.sellCar(inventory);
             break;
         case 4:
             // Call searchCar //

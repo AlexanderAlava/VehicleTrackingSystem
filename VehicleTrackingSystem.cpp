@@ -48,7 +48,7 @@ public:
     InventoryFile();
     // Declaring member functions
     vector<Car> readFileToInventory(); //reads inventory in CSV file and writes to vector
-    void saveInventoryToFile();    //saves inventory to file in CSV format
+    void saveInventoryToFile(vector<Car> inventory);    //saves inventory to file in CSV format
                                    // Declaring the destructor //
     ~InventoryFile();
 };
@@ -58,7 +58,8 @@ public:
 Car::Car(string type2, string make2, string model2, string year2, int count2) : type(type2), make(make2), model(model2),
 year(year2), count(count2)
 {
-
+    if (count2 < 1)
+        count = 1;
 }
 
 void Car::addCar(vector<Car> &inventory)
@@ -334,6 +335,7 @@ vector<Car> InventoryFile::readFileToInventory()
             //create car and store in vector
             Car car(lineVector[0], lineVector[1], lineVector[2], lineVector[3], tempNum);
             invFileContents.push_back(car);
+            lineVector.clear();
         }
     }
 
@@ -341,9 +343,19 @@ vector<Car> InventoryFile::readFileToInventory()
 }
 
 // Defining the saveInventoryToFile function //
-void InventoryFile::saveInventoryToFile()
+void InventoryFile::saveInventoryToFile(vector<Car> inventory)
 {
-
+    ofstream fOut(fName);
+    //Make sure it is open for writing
+    if (fOut.is_open())
+    {
+        for (int pos = 0; pos < inventory.size(); pos++)
+        {
+            stringstream convert;
+            convert << inventory[pos].count;
+            fOut << inventory[pos].type << "," << inventory[pos].make << "," << inventory[pos].model << "," << inventory[pos].year << "," << convert.str() << endl;
+        }
+    }
 }
 
 InventoryFile::~InventoryFile()
@@ -372,7 +384,9 @@ int main()
         std::cout << "(2) Delete a car batch from the inventory.\n";
         std::cout << "(3) Complete a sale.\n";
         std::cout << "(4) Search for a specific car in the inventory.\n";
-        std::cout << "(5) Print current availability of all vehicles in the inventory.\n\n";
+        std::cout << "(5) Print current availability of all vehicles in the inventory.\n";
+        std::cout << "(6) Save current inventory of all vehicles to file.\n\n";
+
         std::cout << "Please enter your selection or enter anything else to exit the program: ";
         std::cin >> option;
 
@@ -399,8 +413,12 @@ int main()
             // Call printInventory //
             car.printInventory(inventory);
             break;
+        case 6:
+            // Call saveInventoryToFile //
+            invFile.saveInventoryToFile(inventory);
         default:
             std::cout << "\n\nThank you for using this program!\nSee you next time!\n";
+            invFile.saveInventoryToFile(inventory);
             return 0;
         }
     }

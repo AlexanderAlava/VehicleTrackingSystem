@@ -2,9 +2,9 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <fstream>
 
 using namespace std;
-
 // Defining the Car class //
 class Car
 {
@@ -35,6 +35,24 @@ public:
     ~Car();
 
 };
+
+class InventoryFile
+{
+    // Declaring data members //
+private:
+    bool fileExists = false;
+
+public:
+    const string fName = "inventory.csv";
+    // Declaring constructor //
+    InventoryFile();
+    // Declaring member functions
+    vector<Car> readFileToInventory(); //reads inventory in CSV file and writes to vector
+    void saveInventoryToFile();    //saves inventory to file in CSV format
+                                   // Declaring the destructor //
+    ~InventoryFile();
+};
+
 
 // Defining the constructor for the Car class //
 Car::Car(string type2, string make2, string model2, string year2, int count2) : type(type2), make(make2), model(model2),
@@ -266,6 +284,73 @@ Car::~Car()
     // Empty body for destructor //
 }
 
+// Defining the constructor for the InventoryFile class //
+InventoryFile::InventoryFile()
+{
+    ifstream fIn(fName);
+    if (fIn)
+    {
+        fileExists = true;
+        std::cout << std::endl << std::endl << "Inventory file found" << std::endl;
+    }
+    else
+    {
+        fileExists = false;
+        std::cout << std::endl << std::endl << "Inventory NOT file found. Creating file..." << std::endl;
+        ofstream fOut(fName);
+        fOut.close();
+    }
+}
+
+// Defining the readFileToInventory function //
+vector<Car> InventoryFile::readFileToInventory()
+{
+    vector<Car> invFileContents;    //store cars in this vector
+    vector<string> lineVector;      //split line into vector
+    string line = "";               //string for storing line
+    int tempNum;
+    //if file exists then parse the csv
+    if (this->fileExists)
+    {
+        //open file
+        ifstream fIn(fName);
+        //while there are lines, read them
+        while (std::getline(fIn, line))
+        {
+            //for parsing and converting to int
+            stringstream parse(line);
+
+            //iterate through the stringstream to parse csv
+            while (parse)
+            {
+                //store data between commas
+                string data;
+                std::getline(parse, data, ',');
+                lineVector.push_back(data);
+            }
+            //convert last value to int
+            stringstream convert(lineVector[4]);
+            convert >> tempNum;
+            //create car and store in vector
+            Car car(lineVector[0], lineVector[1], lineVector[2], lineVector[3], tempNum);
+            invFileContents.push_back(car);
+        }
+    }
+
+    return invFileContents;
+}
+
+// Defining the saveInventoryToFile function //
+void InventoryFile::saveInventoryToFile()
+{
+
+}
+
+InventoryFile::~InventoryFile()
+{
+
+}
+
 int main()
 {
     // Declaring an integer variable //
@@ -273,10 +358,10 @@ int main()
 
     // Declaring placeholder car for calling non-static methods //
     Car car("0", "0", "0", "0", 0);
-
+    // Declaring InventoryFile object to handle reading and writing inventory to disk //
+    InventoryFile invFile;
     // Declaring a vector of Car pointers //
-    vector<Car> inventory; // TODO Should this be Car or Car *? //
-
+    vector<Car> inventory(invFile.readFileToInventory()); // Attempt to read inventory to disk //
     std::cout << "Welcome to this car dealership!\n\n";
 
     // Establishing an infinite while loop to run the program //

@@ -1,5 +1,6 @@
 #include <iostream>     // console i/o
 #include <vector>       // supports vector of cars
+#include <algorithm>	// for_each
 #include <string>       // car descriptions
 #include <sstream>      // converting count of cars from string of user intput to int
 #include <fstream>      // file i/o

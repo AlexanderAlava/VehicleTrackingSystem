@@ -395,9 +395,20 @@ vector<Car> InventoryFile::readFileToInventory()
             //convert last value to int
             stringstream convert(lineVector[4]);
             convert >> tempNum;
-            //create car and store in vector
+            //create car and store in vector. Borrows logic from addCar so a user created csv can have multiple lines
+            //of the same car and it will just add them into the same bin. Prevents messy with multiple bins for one
+            //car because a user made their own csv.
             Car car(lineVector[0], lineVector[1], lineVector[2], lineVector[3], tempNum);
-            invFileContents.push_back(car);
+            if (car.carExists(invFileContents, tempNum)) //reusing tempNum as carIndex
+            {
+                //if the car already exists in the inventory, add to the count
+                invFileContents[tempNum].count += car.count;
+            }
+            else
+            {
+                //if the car doesn't exist in the inventory, add it to the inventory
+                invFileContents.push_back(car);
+            }
             lineVector.clear();
         }
     }

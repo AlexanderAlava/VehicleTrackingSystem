@@ -480,6 +480,7 @@ int main()
         case 6:
             // Call saveInventoryToFile //
             invFile.saveInventoryToFile(inventory);
+            break;
         default:
             std::cout << "\n\nThank you for using this program!\nSee you next time!\n";
             invFile.saveInventoryToFile(inventory);

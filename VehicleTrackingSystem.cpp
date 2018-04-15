@@ -1,8 +1,9 @@
-#include <iostream>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <fstream>
+#include <iostream>     // console i/o
+#include <algorithm>    // needed to use 'for_each'
+#include <vector>       // supports vector of cars
+#include <string>       // car descriptions
+#include <sstream>      // converting count of cars from string of user intput to int
+#include <fstream>      // file i/o
 
 using namespace std;
 // Defining the Car class //
@@ -29,6 +30,7 @@ public:
     void promptCar(string &tempType, string &tempMake, string &tempModel, string &tempYear);
     int getCarIndex(vector<Car> inventory); //gets index of car in inventory that matches search. ALL FIELDS NEEDED
     bool carExists(vector<Car> inventory, int &carIndex);
+    void carDescToLower(string &lowerType, string &lowerMake, string &lowerModel, string &lowerYear);
     friend ostream& operator<<(ostream& os, Car& car);
     friend bool operator==(const Car& compare1, const Car& compare2);
     // Declaring the destructor //
@@ -39,17 +41,15 @@ public:
 class InventoryFile
 {
     // Declaring data members //
-private:
-    bool fileExists = false;
-
 public:
+    bool fileExists = false;
     const string fName = "inventory.csv";
     // Declaring constructor //
     InventoryFile();
     // Declaring member functions
     vector<Car> readFileToInventory(); //reads inventory in CSV file and writes to vector
     void saveInventoryToFile(vector<Car> inventory);    //saves inventory to file in CSV format
-                                   // Declaring the destructor //
+    // Declaring the destructor //
     ~InventoryFile();
 };
 
@@ -175,23 +175,38 @@ void Car::sellCar(vector<Car> &inventory)
 // Defining the function that will search for a specific car //
 void Car::searchCar(vector<Car> inventory)
 {
+    Car car("0", "0", "0", "0", 0);
+    //Declare vars for storing search parameters
     string tempType;
     string tempMake;
     string tempModel;
     string tempYear;
-
+    //Get search parameters and make them lowercase
     promptCar(tempType, tempMake, tempModel, tempYear);
+    car.carDescToLower(tempType, tempMake, tempModel, tempYear);
+    //Declare vars for cars in vector to make them lowercase
+    string vCarType;
+    string vCarMake;
+    string vCarModel;
+    string vCarYear;
 
     vector<Car> tempList;
     for (int pos = 0; pos < inventory.size(); pos++)
     {
-        if (inventory[pos].type == tempType || tempType.length() == 0) //if type matches or no input
+        //Get description of car in vector
+        vCarType = inventory[pos].type;
+        vCarMake = inventory[pos].make;
+        vCarModel = inventory[pos].model;
+        vCarYear = inventory[pos].year;
+        //Make them lowercase
+        car.carDescToLower(vCarType, vCarMake, vCarModel, vCarYear);
+        if (vCarType == tempType || tempType.length() == 0) //if type matches or no input
         {
-            if (inventory[pos].make == tempMake || tempMake.length() == 0) //if make matches or no input
+            if (vCarMake == tempMake || tempMake.length() == 0) //if make matches or no input
             {
-                if (inventory[pos].model == tempModel || tempModel.length() == 0) //if model matches or no input
+                if (vCarModel == tempModel || tempModel.length() == 0) //if model matches or no input
                 {
-                    if (inventory[pos].year == tempYear || tempYear.length() == 0) //if year matches or no input
+                    if (vCarYear == tempYear || tempYear.length() == 0) //if year matches or no input
                         tempList.push_back(inventory[pos]); //push car from inv on to tempList if it meets criteria
                 }
             }
@@ -255,6 +270,37 @@ bool Car::carExists(vector<Car> inventory, int &carIndex)
     }
 }
 
+
+// Defining the function that will transform strings to lower
+void Car::carDescToLower(string &lowerType, string &lowerMake, string &lowerModel, string &lowerYear)
+{
+    //C++ for each turn string into lowercase car Type
+    std::for_each(lowerType.begin(), lowerType.end(), [](char & c)
+        {
+            c = ::tolower(c);
+        }
+    );
+    //C++ for each turn string into lowercase car Make
+    std::for_each(lowerMake.begin(), lowerMake.end(), [](char & c)
+    {
+        c = ::tolower(c);
+    }
+    );
+    //C++ for each turn string into lowercase car Model
+    std::for_each(lowerModel.begin(), lowerModel.end(), [](char & c)
+    {
+        c = ::tolower(c);
+    }
+    );
+    //C++ for each turn string into lowercase car Year
+    std::for_each(lowerYear.begin(), lowerYear.end(), [](char & c)
+    {
+        c = ::tolower(c);
+    }
+    );
+    return;
+}
+
 // Overloading << operator to print cars //
 ostream& operator<<(ostream& os, Car& car)
 {
@@ -270,10 +316,27 @@ ostream& operator<<(ostream& os, Car& car)
 // Overloading == operator for comparing cars //
 bool operator==(const Car& compare1, const Car& compare2)
 {
-    if (compare1.type == compare2.type &&
-        compare1.make == compare2.make &&
-        compare1.model == compare2.model &&
-        compare1.year == compare2.year)
+    //Make blank car for calling the function
+    Car car("0", "0", "0", "0", 0);
+    //Get car description and convert to lower
+    string c1LowerType = compare1.type;
+    string c1LowerMake = compare1.make;
+    string c1LowerModel = compare1.model;
+    string c1LowerYear = compare1.year;
+    car.carDescToLower(c1LowerType, c1LowerMake, c1LowerModel, c1LowerYear);
+
+    //Get car description and convert to lower
+    string c2LowerType = compare2.type;
+    string c2LowerMake = compare2.make;
+    string c2LowerModel = compare2.model;
+    string c2LowerYear = compare2.year;
+    car.carDescToLower(c2LowerType, c2LowerMake, c2LowerModel, c2LowerYear);
+
+
+    if (c1LowerType == c2LowerType &&
+        c1LowerMake == c2LowerMake &&
+        c1LowerModel == c2LowerModel &&
+        c1LowerYear == c2LowerYear)
         return true;
     else
         return false;
@@ -356,6 +419,7 @@ void InventoryFile::saveInventoryToFile(vector<Car> inventory)
             fOut << inventory[pos].type << "," << inventory[pos].make << "," << inventory[pos].model << "," << inventory[pos].year << "," << convert.str() << endl;
         }
     }
+    fOut.close();
 }
 
 InventoryFile::~InventoryFile()

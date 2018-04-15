@@ -1,10 +1,10 @@
-#include <iostream>
-#include <vector>
-#include <string>
-#include <sstream>
+#include <iostream>     // console i/o
+#include <vector>       // supports vector of cars
+#include <string>       // car descriptions
+#include <sstream>      // converting count of cars from string of user intput to int
+#include <fstream>      // file i/o
 
 using namespace std;
-
 // Defining the Car class //
 class Car
 {
@@ -25,10 +25,12 @@ public:
     void deleteCar(vector<Car> &inventory);
     void sellCar(vector<Car> &inventory);
     void searchCar(vector<Car> inventory); //searches for car based on parameters. all fields not needed
-    void printInventory(vector<Car> inventory);
-    void promptCar(string &tempType, string &tempMake, string &tempModel, string &tempYear);
-    int getCarIndex(vector<Car> inventory); //gets index of car in inventory that matches search. ALL FIELDS NEEDED
-    bool carExists(vector<Car> inventory, int &carIndex);
+    void printInventory(vector<Car> inventory); //iterates through inventory and prints cars
+    void promptCar(string &tempType, string &tempMake, string &tempModel, string &tempYear); //Standard prompt for car
+    int getCarIndex(vector<Car> inventory); //gets index of car in inventory that matches search.
+    bool carExists(vector<Car> inventory, int &carIndex); //returns true if car exists
+    void carDescToLower(string &lowerType, string &lowerMake, string &lowerModel, string &lowerYear); //converts all car descriptions to lower for comparison
+    //Operator overloads
     friend ostream& operator<<(ostream& os, Car& car);
     friend bool operator==(const Car& compare1, const Car& compare2);
     // Declaring the destructor //
@@ -36,11 +38,13 @@ public:
 
 };
 
+
 // Defining the constructor for the Car class //
 Car::Car(string type2, string make2, string model2, string year2, int count2) : type(type2), make(make2), model(model2),
 year(year2), count(count2)
 {
-
+    if (count2 < 1)
+        count = 1;
 }
 
 void Car::addCar(vector<Car> &inventory)
@@ -77,10 +81,10 @@ void Car::addCar(vector<Car> &inventory)
         //if the car doesn't exist in the inventory, add it to the inventory
         inventory.push_back(newCar);
     }
-
-
+    
+    
     /*-------------------------------------------------------------------------------------
-    Original logic that checked if car was in the inventory already
+    Original logic that checked if car was in the inventory already 
     -------------------------------------------------------------------------------------*/
 
     //int newCarIndex = newCar.getCarIndex(inventory);     // Get index to see if it exists in the vector already
@@ -115,7 +119,7 @@ void Car::deleteCar(vector<Car> &inventory)
     else
     {
         //otherwise tell user that they can't delete a car that never existed
-        std::cout << endl << "Can't delete a car that doesn't exist!" << endl << endl;
+        std::cout << endl << endl << "Can't delete a car that doesn't exist!" << endl;
     }
 
 }
@@ -236,6 +240,37 @@ bool Car::carExists(vector<Car> inventory, int &carIndex)
     }
 }
 
+
+// Defining the function that will transform strings to lower
+void Car::carDescToLower(string &lowerType, string &lowerMake, string &lowerModel, string &lowerYear)
+{
+    //C++ for each turn string into lowercase car Type
+    std::for_each(lowerType.begin(), lowerType.end(), [](char & c)
+        {
+            c = ::tolower(c);
+        }
+    );
+    //C++ for each turn string into lowercase car Make
+    std::for_each(lowerMake.begin(), lowerMake.end(), [](char & c)
+    {
+        c = ::tolower(c);
+    }
+    );
+    //C++ for each turn string into lowercase car Model
+    std::for_each(lowerModel.begin(), lowerModel.end(), [](char & c)
+    {
+        c = ::tolower(c);
+    }
+    );
+    //C++ for each turn string into lowercase car Year
+    std::for_each(lowerYear.begin(), lowerYear.end(), [](char & c)
+    {
+        c = ::tolower(c);
+    }
+    );
+    return;
+}
+
 // Overloading << operator to print cars //
 ostream& operator<<(ostream& os, Car& car)
 {
@@ -251,10 +286,28 @@ ostream& operator<<(ostream& os, Car& car)
 // Overloading == operator for comparing cars //
 bool operator==(const Car& compare1, const Car& compare2)
 {
-    if (compare1.type == compare2.type &&
-        compare1.make == compare2.make &&
-        compare1.model == compare2.model &&
-        compare1.year == compare2.year)
+    //Make blank car for calling the function
+    Car car("0", "0", "0", "0", 0);
+    //Get car description and convert to lower
+    string c1LowerType = compare1.type;
+    string c1LowerMake = compare1.make;
+    string c1LowerModel = compare1.model;
+    string c1LowerYear = compare1.year;
+    car.carDescToLower(c1LowerType, c1LowerMake, c1LowerModel, c1LowerYear);
+    cout << "Lower car: " << c1LowerType << " " << c1LowerMake << " " << c1LowerModel << endl;
+    //Get car description and convert to lower
+    string c2LowerType = compare2.type;
+    string c2LowerMake = compare2.make;
+    string c2LowerModel = compare2.model;
+    string c2LowerYear = compare2.year;
+    car.carDescToLower(c2LowerType, c2LowerMake, c2LowerModel, c2LowerYear);
+    cout << "Lower car: " << c2LowerType << " " << c2LowerMake << " " << c2LowerModel << endl;
+
+
+    if (c1LowerType == c2LowerType &&
+        c1LowerMake == c2LowerMake &&
+        c1LowerModel == c2LowerModel &&
+        c1LowerYear == c2LowerYear)
         return true;
     else
         return false;
@@ -266,6 +319,8 @@ Car::~Car()
     // Empty body for destructor //
 }
 
+
+
 int main()
 {
     // Declaring an integer variable //
@@ -273,21 +328,20 @@ int main()
 
     // Declaring placeholder car for calling non-static methods //
     Car car("0", "0", "0", "0", 0);
-
     // Declaring a vector of Car pointers //
-    vector<Car> inventory; // TODO Should this be Car or Car *? //
-
+    vector<Car> inventory;
     std::cout << "Welcome to this car dealership!\n\n";
 
     // Establishing an infinite while loop to run the program //
     while (true)
     {
         // Prompting for and reading in input for current selection //
-        std::cout << endl << "(1) Add a car batch to the inventory.\n";
+        std::cout << "(1) Add a car batch to the inventory.\n";
         std::cout << "(2) Delete a car batch from the inventory.\n";
         std::cout << "(3) Complete a sale.\n";
         std::cout << "(4) Search for a specific car in the inventory.\n";
         std::cout << "(5) Print current availability of all vehicles in the inventory.\n\n";
+
         std::cout << "Please enter your selection or enter anything else to exit the program: ";
         std::cin >> option;
 

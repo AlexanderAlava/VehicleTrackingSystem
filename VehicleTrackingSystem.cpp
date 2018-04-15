@@ -77,10 +77,10 @@ void Car::addCar(vector<Car> &inventory)
         //if the car doesn't exist in the inventory, add it to the inventory
         inventory.push_back(newCar);
     }
-    
-    
+
+
     /*-------------------------------------------------------------------------------------
-    Original logic that checked if car was in the inventory already 
+    Original logic that checked if car was in the inventory already
     -------------------------------------------------------------------------------------*/
 
     //int newCarIndex = newCar.getCarIndex(inventory);     // Get index to see if it exists in the vector already
@@ -115,7 +115,7 @@ void Car::deleteCar(vector<Car> &inventory)
     else
     {
         //otherwise tell user that they can't delete a car that never existed
-        std::cout << endl << endl << "Can't delete a car that doesn't exist!" << endl;
+        std::cout << endl << "Can't delete a car that doesn't exist!" << endl << endl;
     }
 
 }
@@ -283,7 +283,7 @@ int main()
     while (true)
     {
         // Prompting for and reading in input for current selection //
-        std::cout << "(1) Add a car batch to the inventory.\n";
+        std::cout << endl << "(1) Add a car batch to the inventory.\n";
         std::cout << "(2) Delete a car batch from the inventory.\n";
         std::cout << "(3) Complete a sale.\n";
         std::cout << "(4) Search for a specific car in the inventory.\n";

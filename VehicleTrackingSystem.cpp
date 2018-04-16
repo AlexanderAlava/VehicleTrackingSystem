@@ -43,7 +43,6 @@ class InventoryFile
 {
     // Declaring data members //
 public:
-    bool fileExists = false;
     const string fName = "inventory.csv";
     // Declaring constructor //
     InventoryFile();
@@ -112,8 +111,10 @@ void Car::deleteCar(vector<Car> &inventory)
     string tempYear;
     int carIndex;
     promptCar(tempType, tempMake, tempModel, tempYear);
+
     //See if car exists within the inventory
     Car searchedCar(tempType, tempMake, tempModel, tempYear, 0);
+    
     //If car exists, remove it from the inventory
     if (searchedCar.carExists(inventory, carIndex))
     {
@@ -138,8 +139,10 @@ void Car::sellCar(vector<Car> &inventory)
     string tempYear;
     int carIndex;
     promptCar(tempType, tempMake, tempModel, tempYear);
+    
     //See if car exists within the inventory
     Car searchedCar(tempType, tempMake, tempModel, tempYear, 0);
+    
     //if car exists, decrement the count
     if (searchedCar.carExists(inventory,carIndex))
     {
@@ -170,16 +173,18 @@ void Car::searchCar(vector<Car> inventory)
     string tempMake;
     string tempModel;
     string tempYear;
+    
     //Get search parameters and make them lowercase
     promptCar(tempType, tempMake, tempModel, tempYear);
     car.carDescToLower(tempType, tempMake, tempModel, tempYear);
+    
     //Declare vars for cars in vector to make them lowercase
     string vCarType;
     string vCarMake;
     string vCarModel;
     string vCarYear;
 
-    vector<Car> tempList;
+    vector<Car> tempList; //vector for storing search results
     for (int pos = 0; pos < inventory.size(); pos++)
     {
         //Get description of car in vector
@@ -187,8 +192,12 @@ void Car::searchCar(vector<Car> inventory)
         vCarMake = inventory[pos].make;
         vCarModel = inventory[pos].model;
         vCarYear = inventory[pos].year;
+        
         //Make them lowercase
         car.carDescToLower(vCarType, vCarMake, vCarModel, vCarYear);
+        
+        //compare lowercase descriptions from inventory to user supplied lowercase descriptions
+        //No input for a search field is an implied don't care/wildcard
         if (vCarType == tempType || tempType.length() == 0) //if type matches or no input
         {
             if (vCarMake == tempMake || tempMake.length() == 0) //if make matches or no input
@@ -201,6 +210,7 @@ void Car::searchCar(vector<Car> inventory)
             }
         }
     }
+    //Print list of cars that match the search results
     std::cout << endl << endl << "Cars matching search: " << endl;
     printInventory(tempList);
 
@@ -237,6 +247,7 @@ void Car::promptCar(string &tempType, string &tempMake, string &tempModel, strin
 // Defining the function that will return the index of an equivalent car //
 int Car::getCarIndex(vector<Car> inventory)
 {
+    //Iterate through the inventory. Return index if match. Return -1 if no match.
     for (int pos = 0; pos < inventory.size(); pos++)
     {
         if (inventory[pos] == *this)
@@ -340,16 +351,15 @@ Car::~Car()
 // Defining the constructor for the InventoryFile class //
 InventoryFile::InventoryFile()
 {
+    //Open file for reading
     ifstream fIn(fName);
     if (fIn)
     {
-        fileExists = true;
-        std::cout << std::endl << std::endl << "Inventory file found" << std::endl;
+        std::cout << "Inventory file found" << std::endl;
     }
     else
     {
-        fileExists = false;
-        std::cout << std::endl << std::endl << "Inventory NOT file found. Creating file..." << std::endl;
+        std::cout << "Inventory NOT file found. Creating file..." << std::endl;
         ofstream fOut(fName);
         fOut.close();
     }
@@ -362,14 +372,18 @@ vector<Car> InventoryFile::readFileToInventory()
     vector<string> lineVector;      //split line into vector
     string line = "";               //string for storing line
     int tempNum;
-    //if file exists then parse the csv
-    if (this->fileExists)
+    int lineNum = 0;
+    //Open file
+    ifstream fIn(fName);
+
+    //if file opens then parse the csv
+    if (fIn)
     {
-        //open file
-        ifstream fIn(fName);
         //while there are lines, read them
         while (std::getline(fIn, line))
         {
+            //Increment line number
+            lineNum++;
             //for parsing and converting to int
             stringstream parse(line);
 
@@ -381,25 +395,45 @@ vector<Car> InventoryFile::readFileToInventory()
                 std::getline(parse, data, ',');
                 lineVector.push_back(data);
             }
-            //convert last value to int
-            stringstream convert(lineVector[4]);
-            convert >> tempNum;
-            //create car and store in vector. Borrows logic from addCar so a user created csv can have multiple lines
-            //of the same car and it will just add them into the same bin. Prevents messy with multiple bins for one
-            //car because a user made their own csv.
-            Car car(lineVector[0], lineVector[1], lineVector[2], lineVector[3], tempNum);
-            if (car.carExists(invFileContents, tempNum)) //reusing tempNum as carIndex
+            //Check to make sure no blank or too short lines in inventory.csv
+            if (lineVector.size() >= 6)
             {
-                //if the car already exists in the inventory, add to the count
-                invFileContents[tempNum].count += car.count;
+                //convert last value to int
+                stringstream convert(lineVector[4]);
+                convert >> tempNum;
+                //create car and store in vector. Borrows logic from addCar so a user created csv can have multiple lines
+                //of the same car and it will just add them into the same bin. Prevents messy with multiple bins for one
+                //car because a user made their own csv.
+                Car car(lineVector[0], lineVector[1], lineVector[2], lineVector[3], tempNum);
+                if (car.carExists(invFileContents, tempNum)) //reusing tempNum as carIndex
+                {
+                    //if the car already exists in the inventory, add to the count
+                    invFileContents[tempNum].count += car.count;
+                }
+                else
+                {
+                    //if the car doesn't exist in the inventory, add it to the inventory
+                    invFileContents.push_back(car);
+                }
             }
+            //Let user know there might be an issue with their file
             else
             {
-                //if the car doesn't exist in the inventory, add it to the inventory
-                invFileContents.push_back(car);
+                std::cout << std::endl << "Warning! Improper line formatting in inventory.csv" << std::endl;
+                std::cout << "Line number " << lineNum << " doesn't have enough parameters." << std::endl;
             }
+            //Empty vector for next line
             lineVector.clear();
+
         }
+    }
+    else
+    {
+        //Close file reading stream then open the file for writing to create it.
+        fIn.close();
+        std::cout << std::endl << std::endl << "Inventory NOT file found. Creating file..." << std::endl;
+        ofstream fOut(fName);
+        fOut.close();
     }
 
     return invFileContents;
@@ -439,7 +473,7 @@ int main()
     InventoryFile invFile;
     // Declaring a vector of Car pointers //
     vector<Car> inventory(invFile.readFileToInventory()); // Attempt to read inventory to disk //
-    std::cout << "Welcome to this car dealership!\n\n";
+    std::cout << std::endl << "Welcome to this car dealership!\n\n";
 
     // Establishing an infinite while loop to run the program //
     while (true)

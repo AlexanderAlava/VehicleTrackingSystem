@@ -1,9 +1,8 @@
 #include <iostream>     // console i/o
+#include <algorithm>    // for 'for_each'
 #include <vector>       // supports vector of cars
-#include <algorithm>	// for_each
 #include <string>       // car descriptions
 #include <sstream>      // converting count of cars from string of user intput to int
-#include <fstream>      // file i/o
 
 using namespace std;
 // Defining the Car class //
@@ -22,16 +21,15 @@ public:
     Car(string type, string make, string model, string year, int count);
 
     // Declaring member functions //
-    void addCar(vector<Car> &inventory);
-    void deleteCar(vector<Car> &inventory);
-    void sellCar(vector<Car> &inventory);
+    void addCar(vector<Car> &inventory); //Adds car by prompting the user for information
+    void deleteCar(vector<Car> &inventory); //Deletes specific car that matches user supplied information
+    void sellCar(vector<Car> &inventory); //Sells specific car that matches user supplied information
     void searchCar(vector<Car> inventory); //searches for car based on parameters. all fields not needed
-    void printInventory(vector<Car> inventory); //iterates through inventory and prints cars
-    void promptCar(string &tempType, string &tempMake, string &tempModel, string &tempYear); //Standard prompt for car
-    int getCarIndex(vector<Car> inventory); //gets index of car in inventory that matches search.
-    bool carExists(vector<Car> inventory, int &carIndex); //returns true if car exists
-    void carDescToLower(string &lowerType, string &lowerMake, string &lowerModel, string &lowerYear); //converts all car descriptions to lower for comparison
-    //Operator overloads
+    void printInventory(vector<Car> inventory); //Prints all cars in the inventory
+    void promptCar(string &tempType, string &tempMake, string &tempModel, string &tempYear); //Function to prompt user for information
+    int getCarIndex(vector<Car> inventory); //gets index of car in inventory that matches search. ALL FIELDS NEEDED
+    bool carExists(vector<Car> inventory, int &carIndex); //checks if car exists and gets the index
+    void carDescToLower(string &lowerType, string &lowerMake, string &lowerModel, string &lowerYear); //converts descriptor strings to lowercase for comparing 2 cars
     friend ostream& operator<<(ostream& os, Car& car);
     friend bool operator==(const Car& compare1, const Car& compare2);
     // Declaring the destructor //
@@ -39,11 +37,11 @@ public:
 
 };
 
-
 // Defining the constructor for the Car class //
 Car::Car(string type2, string make2, string model2, string year2, int count2) : type(type2), make(make2), model(model2),
 year(year2), count(count2)
 {
+    //If something goes wrong or the user  puts in a bogus number then set the count of cars to 1
     if (count2 < 1)
         count = 1;
 }
@@ -60,18 +58,19 @@ void Car::addCar(vector<Car> &inventory)
 
     // Prompting for and reading in user input for car details //
     promptCar(tempType, tempMake, tempModel, tempYear);
+    //Get num of cars to add
     std::cout << "Count: ";
     getline(std::cin, sTempCount);
     stringstream convert(sTempCount);   //converting string to int
     convert >> iTempCount;
-    //cout << iTempCount << " iTempCount" << endl;
 
     //If user leaves Count empty or puts down a dumb negative number, assume at least 1 car and not 0 or nega-cars
     if (iTempCount <= 0)
         iTempCount = 1;
 
-
     Car newCar(tempType, tempMake, tempModel, tempYear, iTempCount); // Make newCar object with desired Type, Make, Model, and Year
+
+                                                                     //Check if the car is in the inventory already
     if (newCar.carExists(inventory, iTempCount)) //reusing iTempCount as carIndex
     {
         //if the car already exists in the inventory, add to the count
@@ -82,21 +81,7 @@ void Car::addCar(vector<Car> &inventory)
         //if the car doesn't exist in the inventory, add it to the inventory
         inventory.push_back(newCar);
     }
-    
-    
-    /*-------------------------------------------------------------------------------------
-    Original logic that checked if car was in the inventory already 
-    -------------------------------------------------------------------------------------*/
 
-    //int newCarIndex = newCar.getCarIndex(inventory);     // Get index to see if it exists in the vector already
-    //if(newCarIndex == -1)
-    //{
-    //    inventory.push_back(newCar);    // TODO(Vector placement/usage has to be sorted out, not currently working) //
-    //}
-    //else
-    //{
-    //    inventory[newCarIndex].count += newCar.count; //Add count of the car with the same attributes
-    //}
 }
 
 // Defining the function that will delete car batches from the car vector //
@@ -109,8 +94,10 @@ void Car::deleteCar(vector<Car> &inventory)
     string tempYear;
     int carIndex;
     promptCar(tempType, tempMake, tempModel, tempYear);
+
     //See if car exists within the inventory
     Car searchedCar(tempType, tempMake, tempModel, tempYear, 0);
+
     //If car exists, remove it from the inventory
     if (searchedCar.carExists(inventory, carIndex))
     {
@@ -135,10 +122,12 @@ void Car::sellCar(vector<Car> &inventory)
     string tempYear;
     int carIndex;
     promptCar(tempType, tempMake, tempModel, tempYear);
+
     //See if car exists within the inventory
     Car searchedCar(tempType, tempMake, tempModel, tempYear, 0);
+
     //if car exists, decrement the count
-    if (searchedCar.carExists(inventory,carIndex))
+    if (searchedCar.carExists(inventory, carIndex))
     {
         //Decrement car count
         inventory[carIndex].count--;
@@ -148,6 +137,7 @@ void Car::sellCar(vector<Car> &inventory)
             inventory[carIndex].~Car();
             inventory.erase(inventory.begin() + carIndex);
         }
+        std::cout << std::endl << "SOLD!" << std::endl;
         return;
     }
     else //otherwise tell user that the car they are trying to sell doesn't exist
@@ -161,28 +151,50 @@ void Car::sellCar(vector<Car> &inventory)
 // Defining the function that will search for a specific car //
 void Car::searchCar(vector<Car> inventory)
 {
+    Car car("0", "0", "0", "0", 0);
+    //Declare vars for storing search parameters
     string tempType;
     string tempMake;
     string tempModel;
     string tempYear;
 
+    //Get search parameters and make them lowercase
     promptCar(tempType, tempMake, tempModel, tempYear);
+    car.carDescToLower(tempType, tempMake, tempModel, tempYear);
 
-    vector<Car> tempList;
+    //Declare vars for cars in vector to make them lowercase
+    string vCarType;
+    string vCarMake;
+    string vCarModel;
+    string vCarYear;
+
+    vector<Car> tempList; //vector for storing search results
     for (int pos = 0; pos < inventory.size(); pos++)
     {
-        if (inventory[pos].type == tempType || tempType.length() == 0) //if type matches or no input
+        //Get description of car in vector
+        vCarType = inventory[pos].type;
+        vCarMake = inventory[pos].make;
+        vCarModel = inventory[pos].model;
+        vCarYear = inventory[pos].year;
+
+        //Make them lowercase
+        car.carDescToLower(vCarType, vCarMake, vCarModel, vCarYear);
+
+        //compare lowercase descriptions from inventory to user supplied lowercase descriptions
+        //No input for a search field is an implied don't care/wildcard
+        if (vCarType == tempType || tempType.length() == 0) //if type matches or no input
         {
-            if (inventory[pos].make == tempMake || tempMake.length() == 0) //if make matches or no input
+            if (vCarMake == tempMake || tempMake.length() == 0) //if make matches or no input
             {
-                if (inventory[pos].model == tempModel || tempModel.length() == 0) //if model matches or no input
+                if (vCarModel == tempModel || tempModel.length() == 0) //if model matches or no input
                 {
-                    if (inventory[pos].year == tempYear || tempYear.length() == 0) //if year matches or no input
+                    if (vCarYear == tempYear || tempYear.length() == 0) //if year matches or no input
                         tempList.push_back(inventory[pos]); //push car from inv on to tempList if it meets criteria
                 }
             }
         }
     }
+    //Print list of cars that match the search results
     std::cout << endl << endl << "Cars matching search: " << endl;
     printInventory(tempList);
 
@@ -198,7 +210,7 @@ void Car::printInventory(vector<Car> inventory)
         numCars += inventory[position].count;
         std::cout << inventory[position] << endl;
     }
-    std::cout << endl  << endl << "Number of cars in inventory: " << numCars << endl; //print total number of cars
+    std::cout << endl << endl << "Number of cars in inventory: " << numCars << endl; //print total number of cars
 }
 
 // Defining the prompt function that will ask for the car details //
@@ -219,6 +231,7 @@ void Car::promptCar(string &tempType, string &tempMake, string &tempModel, strin
 // Defining the function that will return the index of an equivalent car //
 int Car::getCarIndex(vector<Car> inventory)
 {
+    //Iterate through the inventory. Return index if match. Return -1 if no match.
     for (int pos = 0; pos < inventory.size(); pos++)
     {
         if (inventory[pos] == *this)
@@ -247,9 +260,9 @@ void Car::carDescToLower(string &lowerType, string &lowerMake, string &lowerMode
 {
     //C++ for each turn string into lowercase car Type
     std::for_each(lowerType.begin(), lowerType.end(), [](char & c)
-        {
-            c = ::tolower(c);
-        }
+    {
+        c = ::tolower(c);
+    }
     );
     //C++ for each turn string into lowercase car Make
     std::for_each(lowerMake.begin(), lowerMake.end(), [](char & c)
@@ -295,14 +308,13 @@ bool operator==(const Car& compare1, const Car& compare2)
     string c1LowerModel = compare1.model;
     string c1LowerYear = compare1.year;
     car.carDescToLower(c1LowerType, c1LowerMake, c1LowerModel, c1LowerYear);
-    cout << "Lower car: " << c1LowerType << " " << c1LowerMake << " " << c1LowerModel << endl;
+
     //Get car description and convert to lower
     string c2LowerType = compare2.type;
     string c2LowerMake = compare2.make;
     string c2LowerModel = compare2.model;
     string c2LowerYear = compare2.year;
     car.carDescToLower(c2LowerType, c2LowerMake, c2LowerModel, c2LowerYear);
-    cout << "Lower car: " << c2LowerType << " " << c2LowerMake << " " << c2LowerModel << endl;
 
 
     if (c1LowerType == c2LowerType &&
@@ -321,7 +333,6 @@ Car::~Car()
 }
 
 
-
 int main()
 {
     // Declaring an integer variable //
@@ -331,7 +342,7 @@ int main()
     Car car("0", "0", "0", "0", 0);
     // Declaring a vector of Car pointers //
     vector<Car> inventory;
-    std::cout << "Welcome to this car dealership!\n\n";
+    std::cout << std::endl << "Welcome to this car dealership!\n\n";
 
     // Establishing an infinite while loop to run the program //
     while (true)

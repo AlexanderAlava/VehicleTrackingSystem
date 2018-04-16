@@ -154,11 +154,12 @@ void Car::sellCar(vector<Car> &inventory)
             inventory[carIndex].~Car();
             inventory.erase(inventory.begin() + carIndex);
         }
+        std::cout << std::endl << "SOLD!" << std::endl << std::endl;
         return;
     }
     else //otherwise tell user that the car they are trying to sell doesn't exist
     {
-        std::cout << endl << endl << "Car does not exist!" << endl;
+        std::cout << std::endl << "Car does not exist!" << std::endl;
         return;
     }
 
@@ -518,7 +519,6 @@ int main()
             break;
         default:
             std::cout << "\n\nThank you for using this program!\nSee you next time!\n";
-            invFile.saveInventoryToFile(inventory);
             return 0;
         }
     }

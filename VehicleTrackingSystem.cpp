@@ -22,22 +22,23 @@ public:
     Car(string type, string make, string model, string year, int count);
 
     // Declaring member functions //
-    void addCar(vector<Car> &inventory);
-    void deleteCar(vector<Car> &inventory);
-    void sellCar(vector<Car> &inventory);
+    void addCar(vector<Car> &inventory); //Adds car by prompting the user for information
+    void deleteCar(vector<Car> &inventory); //Deletes specific car that matches user supplied information
+    void sellCar(vector<Car> &inventory); //Sells specific car that matches user supplied information
     void searchCar(vector<Car> inventory); //searches for car based on parameters. all fields not needed
-    void printInventory(vector<Car> inventory);
-    void promptCar(string &tempType, string &tempMake, string &tempModel, string &tempYear);
+    void printInventory(vector<Car> inventory); //Prints all cars in the inventory
+    void promptCar(string &tempType, string &tempMake, string &tempModel, string &tempYear); //Function to prompt user for information
     int getCarIndex(vector<Car> inventory); //gets index of car in inventory that matches search. ALL FIELDS NEEDED
-    bool carExists(vector<Car> inventory, int &carIndex);
-    void carDescToLower(string &lowerType, string &lowerMake, string &lowerModel, string &lowerYear);
-    friend ostream& operator<<(ostream& os, Car& car);
+    bool carExists(vector<Car> inventory, int &carIndex); //checks if car exists and gets the index
+    void carDescToLower(string &lowerType, string &lowerMake, string &lowerModel, string &lowerYear); //converts descriptor strings to lowercase for comparing 2 cars
+    friend ostream& operator<<(ostream& os, Car& car); 
     friend bool operator==(const Car& compare1, const Car& compare2);
     // Declaring the destructor //
     ~Car();
 
 };
 
+// Defining the InventoryFile class //
 class InventoryFile
 {
     // Declaring data members //
@@ -58,6 +59,7 @@ public:
 Car::Car(string type2, string make2, string model2, string year2, int count2) : type(type2), make(make2), model(model2),
 year(year2), count(count2)
 {
+    //If something goes wrong or the user  puts in a bogus number then set the count of cars to 1
     if (count2 < 1)
         count = 1;
 }
@@ -74,18 +76,19 @@ void Car::addCar(vector<Car> &inventory)
 
     // Prompting for and reading in user input for car details //
     promptCar(tempType, tempMake, tempModel, tempYear);
+    //Get num of cars to add
     std::cout << "Count: ";
     getline(std::cin, sTempCount);
     stringstream convert(sTempCount);   //converting string to int
     convert >> iTempCount;
-    //cout << iTempCount << " iTempCount" << endl;
 
     //If user leaves Count empty or puts down a dumb negative number, assume at least 1 car and not 0 or nega-cars
     if (iTempCount <= 0)
         iTempCount = 1;
 
-
     Car newCar(tempType, tempMake, tempModel, tempYear, iTempCount); // Make newCar object with desired Type, Make, Model, and Year
+
+    //Check if the car is in the inventory already
     if (newCar.carExists(inventory, iTempCount)) //reusing iTempCount as carIndex
     {
         //if the car already exists in the inventory, add to the count
@@ -96,21 +99,7 @@ void Car::addCar(vector<Car> &inventory)
         //if the car doesn't exist in the inventory, add it to the inventory
         inventory.push_back(newCar);
     }
-    
-    
-    /*-------------------------------------------------------------------------------------
-    Original logic that checked if car was in the inventory already 
-    -------------------------------------------------------------------------------------*/
 
-    //int newCarIndex = newCar.getCarIndex(inventory);     // Get index to see if it exists in the vector already
-    //if(newCarIndex == -1)
-    //{
-    //    inventory.push_back(newCar);    // TODO(Vector placement/usage has to be sorted out, not currently working) //
-    //}
-    //else
-    //{
-    //    inventory[newCarIndex].count += newCar.count; //Add count of the car with the same attributes
-    //}
 }
 
 // Defining the function that will delete car batches from the car vector //
@@ -433,6 +422,7 @@ void InventoryFile::saveInventoryToFile(vector<Car> inventory)
     fOut.close();
 }
 
+// Defining the InventoryFile destructor //
 InventoryFile::~InventoryFile()
 {
 
